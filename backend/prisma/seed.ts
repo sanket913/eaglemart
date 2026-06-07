@@ -38,6 +38,19 @@ const products = [
   ['Paw Wipes', 'Pet Care', 'FreshMart', '80 pcs'], ['Chicken Pet Bites', 'Pet Care', 'Farmcrest', '200 g'],
 ];
 
+const groceryImages = [
+  'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=900&q=85',
+];
+
 async function main() {
   await prisma.storeSettings.upsert({
     where: { id: 'default-store-settings' },
@@ -108,7 +121,7 @@ async function main() {
         brand,
         categoryId: categoryMap.get(category)!,
         description: `${name} from ${brand}, quality checked and packed fresh for FreshMart Express customers.`,
-        images: `https://source.unsplash.com/900x700/?grocery,${encodeURIComponent(name)}`,
+        images: groceryImages[index % groceryImages.length],
         mrp,
         sellingPrice: price,
         discount,
@@ -124,22 +137,32 @@ async function main() {
     });
   }
 
-  await prisma.coupon.createMany({
-    data: [
-      { code: 'FRESH10', description: '10% off', type: 'PERCENTAGE', value: 10, maxDiscount: 100 },
-      { code: 'FREEDEL', description: 'Free delivery', type: 'FREE_DELIVERY', value: 0 },
-      { code: 'SAVE50', description: 'Rs 50 off above Rs 499', type: 'FIXED', value: 50, minOrderValue: 499 },
-      { code: 'WELCOME20', description: '20% off first order', type: 'PERCENTAGE', value: 20, maxDiscount: 200, firstOrderOnly: true },
-      { code: 'BIGSAVE', description: 'Rs 100 off above Rs 999', type: 'FIXED', value: 100, minOrderValue: 999 },
-    ],
-  });
+  const couponSeeds = [
+    { code: 'FRESH10', description: '10% off', type: 'PERCENTAGE', value: 10, maxDiscount: 100 },
+    { code: 'FREEDEL', description: 'Free delivery', type: 'FREE_DELIVERY', value: 0 },
+    { code: 'SAVE50', description: 'Rs 50 off above Rs 499', type: 'FIXED', value: 50, minOrderValue: 499 },
+    { code: 'WELCOME20', description: '20% off first order', type: 'PERCENTAGE', value: 20, maxDiscount: 200, firstOrderOnly: true },
+    { code: 'BIGSAVE', description: 'Rs 100 off above Rs 999', type: 'FIXED', value: 100, minOrderValue: 999 },
+  ];
+  for (const coupon of couponSeeds) {
+    await prisma.coupon.upsert({
+      where: { code: coupon.code },
+      update: {},
+      create: coupon,
+    });
+  }
 
-  await prisma.banner.createMany({
-    data: [
-      { title: 'Premium grocery delivery', subtitle: 'Fresh baskets in 20 minutes', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', sortOrder: 1 },
-      { title: 'Weekend pantry edit', subtitle: 'Save on gourmet essentials', image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=1200&q=80', sortOrder: 2 },
-    ],
-  });
+  const bannerSeeds = [
+    { title: 'Premium grocery delivery', subtitle: 'Fresh baskets in 20 minutes', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', sortOrder: 1 },
+    { title: 'Weekend pantry edit', subtitle: 'Save on gourmet essentials', image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=1200&q=80', sortOrder: 2 },
+  ];
+  for (const banner of bannerSeeds) {
+    await prisma.banner.upsert({
+      where: { id: `seed-banner-${banner.sortOrder}` },
+      update: {},
+      create: { id: `seed-banner-${banner.sortOrder}`, ...banner },
+    });
+  }
 
   const demoProduct = await prisma.product.findFirstOrThrow();
   await prisma.order.upsert({

@@ -1,0 +1,31 @@
+databases:
+  - name: eaglemart-db
+    databaseName: eaglemart
+    user: eaglemart
+
+services:
+  - type: web
+    name: eaglemart-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install && npm run db:generate && npm run build
+    startCommand: npx prisma db push && npm run db:seed && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: USE_MEMORY_DB
+        value: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: eaglemart-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        value: https://eaglemart.vercel.app
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
