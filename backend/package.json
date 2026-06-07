@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "node dist/prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -37,6 +37,6 @@
     "typescript": "^5.9.3"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "node dist/prisma/seed.js"
   }
 }
