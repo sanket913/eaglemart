@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: freshmart-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: freshmart_express
+    ports:
+      - "5432:5432"
+    volumes:
+      - freshmart_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  freshmart_postgres_data:
